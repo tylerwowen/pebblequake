@@ -10,7 +10,7 @@ var parseFeed = function(data, quantity) {
 
     // Get date/time substring
     var time = new Date(data.features[i].properties.time);
-    var overview = time.getHours() + ':' + time.getMinutes() + ', ' + time.getDate() + '/' + time.getMonth();
+    var overview = time.getHours() + ':' + time.getMinutes() + ', ' + time.getDate() + '/' + time.getMonth()+1;
     // Add to menu items array
     items.push({
       title:mag,
@@ -29,7 +29,7 @@ var splashWindow = new UI.Window({
 
 // Text element to inform user
 var text = new UI.Text({
-  position: new Vector2(0, 50),
+  position: new Vector2(0, 60),
   size: new Vector2(144, 168),
   text:'Earthquake!!',
   font:'GOTHIC_28_BOLD',
@@ -41,7 +41,7 @@ var text = new UI.Text({
 
 var circle = new UI.Circle({
   position: new Vector2(72, 84),
-  radius: 25,
+  radius: 45,
   backgroundColor: 'black'
 });
 
@@ -50,7 +50,7 @@ splashWindow.add(circle);
 splashWindow.add(text);
 splashWindow.show();
 
-circle.prop({ radius: 50 });
+circle.prop({ radius: 60 });
 // var radius = circle.radius(50);
 // circle.animate('radius', radius, 600);
 
