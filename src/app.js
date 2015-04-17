@@ -1,3 +1,7 @@
+// Tyler Weimin Ouyang
+// ouyang@cs.ucsb.edu
+//
+//
 var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
@@ -10,7 +14,7 @@ var parseFeed = function(data, quantity) {
 
     // Get date/time substring
     var time = new Date(data.features[i].properties.time);
-    var overview = time.getHours() + ':' + time.getMinutes() + ', ' + time.getDate() + '/' + time.getMonth()+1;
+    var overview = time.getHours() + ':' + time.getMinutes() + ', ' + time.getDate() + '/' + (time.getMonth()+1);
     // Add to menu items array
     items.push({
       title:mag,
@@ -24,35 +28,19 @@ var parseFeed = function(data, quantity) {
 
 // Show splash screen while waiting for data
 var splashWindow = new UI.Window({
-  backgroundColor: 'white'
+  backgroundColor: 'clear'
 });
 
-// Text element to inform user
-var text = new UI.Text({
-  position: new Vector2(0, 60),
-  size: new Vector2(144, 168),
-  text:'Earthquake!!',
-  font:'GOTHIC_28_BOLD',
-  color:'white',
-  textOverflow:'wrap',
-  textAlign:'center',
-  backgroundColor:'clear'
-});
-
-var circle = new UI.Circle({
-  position: new Vector2(72, 84),
-  radius: 45,
-  backgroundColor: 'black'
+var logo_image = new UI.Image({
+  position: new Vector2(0, 0),
+  size: new Vector2(144, 144),
+  backgroundColor: 'clear',
+  image:'images/big_icon.png'
 });
 
 // Add to splashWindow and show
-splashWindow.add(circle);
-splashWindow.add(text);
+splashWindow.add(logo_image);
 splashWindow.show();
-
-circle.prop({ radius: 60 });
-// var radius = circle.radius(50);
-// circle.animate('radius', radius, 600);
 
 // Make request to USGS
 var d = new Date();
@@ -107,88 +95,116 @@ function deg2rad(deg) {
   return deg * (Math.PI/180);
 }
 
-function init() {
-  ajax(
-    {
-      url: query,
-      type:'json'
-    },
-    function(data) {
-      // Create an array of Menu items
-      var menuItems = parseFeed(data, 6);
-  
-      // Construct Menu to show to user
-      var resultsMenu = new UI.Menu({
-        sections: [{
-          title: 'Recent Earthquakes',
-          items: menuItems,
-        }]
-      });
-  
-      // Add an action for SELECT
-      resultsMenu.on('select', function(e) {
-        // Get that forecast
-        var properties = data.features[e.itemIndex].properties;
-        var eqLat = data.features[e.itemIndex].geometry.coordinates[1];
-        var eqLon = data.features[e.itemIndex].geometry.coordinates[0];
-        // Assemble body string
-        var content = properties.place + ', ' + Math.round(getDistanceFromLatLonInKm(userLat,userLon,eqLat,eqLon)) + ' Mi away';
-  
-        // Add temperature, pressure etc
-        content += '\nLatitude: ' + eqLat.toFixed(2) + '°N' +
-          '\nLongtitude: ' + (- eqLon).toFixed(2) + '°W' +
-          '\nDepth: ' + (data.features[e.itemIndex].geometry.coordinates[2]).toFixed(2) + 'KM';
-  
-        // Create the Card for detailed view
-        var detailCard = new UI.Card({
-          title:e.item.title,
-          subtitle:e.item.subtitle,
-          body: content,
-          style: "small",
-          scrollable :true
-        });
-  
-        detailCard.show();
-      });
-  
-      // Show the Menu, hide the splash
-      resultsMenu.show();
-      splashWindow.hide();
-  
-      // Register for setinterval
-      var cycle = function() {
-        // Make another request to 
-        ajax(
-          {
-            url: query,
-            type:'json'
-          },
-          // success
-          function(data)  {
-            var newItems = parseFeed(data, 6);
-            if (newItems[0].subtitle != menuItems[0].subtitle) {
-              // Update the Menu's first section
-              resultsMenu.items(0, newItems);
-              Vibe.vibrate('short');
-            }
-            else{
-              console.log('5 min');
-            }
-          },
-          // failure      
-          function(error) {
-            console.log('Download failed: ' + error);
-          }
-        );
-      };
-      cycle();
-      setInterval(cycle, 5 * 60 * 1000);
-  
-    },
-    function(error) {
-      console.log("Download failed: " + error);
-    }
-  );
-}
+ajax(
+  {
+    url: query,
+    type:'json'
+  },
+  function(data) {
+    // Create an array of Menu items
+    var menuItems = parseFeed(data, 6);
 
-setTimeout(init, 1000);
+    // Construct Menu to show to user
+    var resultsMenu = new UI.Menu({
+      sections: [{
+        title: 'Recent Earthquakes',
+        items: menuItems,
+      }]
+    });
+
+    // Add an action for SELECT
+    resultsMenu.on('select', function(e) {
+      // Get that forecast
+      var properties = data.features[e.itemIndex].properties;
+      var eqLat = data.features[e.itemIndex].geometry.coordinates[1];
+      var eqLon = data.features[e.itemIndex].geometry.coordinates[0];
+      // Assemble body string
+      var content = properties.place + ', ' + Math.round(getDistanceFromLatLonInKm(userLat,userLon,eqLat,eqLon)) + ' Mi away';
+
+      // Add temperature, pressure etc
+      content += '\nLatitude: ' + eqLat.toFixed(2) + '°N' +
+        '\nLongtitude: ' + (- eqLon).toFixed(2) + '°W' +
+        '\nDepth: ' + (data.features[e.itemIndex].geometry.coordinates[2]).toFixed(2) + 'KM';
+
+      // Create the Card for detailed view
+      var detailCard = new UI.Card({
+        title:e.item.title,
+        subtitle:e.item.subtitle,
+        body: content,
+        style: "small",
+        scrollable :true
+      });
+
+      detailCard.show();
+    });
+
+    // Show the Menu, hide the splash
+    resultsMenu.show();
+    splashWindow.hide();
+
+    // Register for setinterval
+    var cycle = function() {
+      // Make another request to 
+      ajax(
+        {
+          url: query,
+          type:'json'
+        },
+        // success
+        function(data)  {
+          var newItems = parseFeed(data, 6);
+          if (newItems[0].subtitle != menuItems[0].subtitle) {
+            // Update the Menu's first section
+            splashWindow.hide();
+            resultsMenu.items(0, newItems);
+            resultsMenu.show();
+            Vibe.vibrate('double');
+          }
+          else{
+            console.log('5 min');
+          }
+        },
+        // failure      
+        function(error) {
+          console.log('Download failed: ' + error);
+        }
+      );
+    };
+    cycle();
+    setInterval(cycle, 5 * 60 * 1000);
+
+    resultsMenu.on('longSelect', function(e){
+      splashWindow.show();
+      ajax(
+        {
+          url: query,
+          type:'json'
+        },
+        // success
+        function(data)  {
+          var newItems = parseFeed(data, 6);
+          if (newItems[0].subtitle != menuItems[0].subtitle) {
+            // Update the Menu's first section
+            splashWindow.hide();
+            resultsMenu.items(0, newItems);
+            resultsMenu.show();
+            Vibe.vibrate('double');
+          }
+          else{
+            console.log('no updates');
+            resultsMenu.show();
+            splashWindow.hide();
+          }
+        },
+        // failure      
+        function(error) {
+          console.log('Download failed: ' + error);
+        }
+      );
+    });
+
+  },
+  function(error) {
+    console.log("Download failed: " + error);
+  }
+);
