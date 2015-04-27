@@ -29,14 +29,14 @@
                 "type": "font"
             },
             {
-                "file": "images/mini_icon.png",
-                "menuIcon": true,
-                "name": "IMAGES_MINI_ICON_PNG",
+                "file": "images/big_icon.png",
+                "name": "IMAGES_BIG_ICON_PNG",
                 "type": "png"
             },
             {
-                "file": "images/big_icon.png",
-                "name": "IMAGES_BIG_ICON_PNG",
+                "file": "images/mini_icon.png",
+                "menuIcon": true,
+                "name": "IMAGES_MINI_ICON_PNG",
                 "type": "png"
             }
         ]
