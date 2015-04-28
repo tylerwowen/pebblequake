@@ -44,14 +44,14 @@ splashWindow.show();
 
 // Make request to USGS
 var d = new Date();
-d.setHours(d.getHours()-6);
-var past6Hours = d.toISOString();
+d.setDate(d.getDate()-2);
+var past48Hours = d.toISOString();
 var query = 'http://earthquake.usgs.gov/fdsnws/event/1/query?'+
     'format=geojson'+
-    '&starttime='+past6Hours+
-    '&minlatitude=30&minlongitude=-130'+
-    '&maxlatitude=45&maxlongitude=-112'+
-    '&limit=6'+
+    '&starttime='+past48Hours+
+    '&minlatitude=25&minlongitude=80'+
+    '&maxlatitude=31&maxlongitude=90'+
+    '&limit=12'+
     '&orderby=time';
 
 // Get user's location
@@ -88,7 +88,7 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
   ; 
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
   var d = R * c; // Distance in km
-  return d/1.609;
+  return d;
 }
 
 function deg2rad(deg) {
@@ -102,7 +102,7 @@ ajax(
   },
   function(data) {
     // Create an array of Menu items
-    var menuItems = parseFeed(data, 6);
+    var menuItems = parseFeed(data, 12);
 
     // Construct Menu to show to user
     var resultsMenu = new UI.Menu({
@@ -119,11 +119,11 @@ ajax(
       var eqLat = data.features[e.itemIndex].geometry.coordinates[1];
       var eqLon = data.features[e.itemIndex].geometry.coordinates[0];
       // Assemble body string
-      var content = properties.place + ', ' + Math.round(getDistanceFromLatLonInKm(userLat,userLon,eqLat,eqLon)) + ' Mi away';
+      var content = properties.place + ', ' + Math.round(getDistanceFromLatLonInKm(userLat,userLon,eqLat,eqLon)) + ' KM away';
 
       // Add temperature, pressure etc
       content += '\nLatitude: ' + eqLat.toFixed(2) + '°N' +
-        '\nLongtitude: ' + (- eqLon).toFixed(2) + '°W' +
+        '\nLongtitude: ' + eqLon.toFixed(2) + '°E' +
         '\nDepth: ' + (data.features[e.itemIndex].geometry.coordinates[2]).toFixed(2) + 'KM';
 
       // Create the Card for detailed view
@@ -152,7 +152,7 @@ ajax(
         },
         // success
         function(data)  {
-          var newItems = parseFeed(data, 6);
+          var newItems = parseFeed(data, 12);
           if (newItems[0].subtitle != menuItems[0].subtitle) {
             // Update the Menu's first section
             splashWindow.hide();
@@ -182,7 +182,7 @@ ajax(
         },
         // success
         function(data)  {
-          var newItems = parseFeed(data, 6);
+          var newItems = parseFeed(data, 12);
           if (newItems[0].subtitle != menuItems[0].subtitle) {
             // Update the Menu's first section
             splashWindow.hide();
